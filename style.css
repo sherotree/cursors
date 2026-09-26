@@ -1,0 +1,76 @@
+/* @sherotree/cursors — SVG hotspot cursors (default, pointer, grab, grabbing).
+ * Import: import '@sherotree/cursors/style.css'
+ * Optional: wrap a subtree with class "sherotree-cursors" if you use scoped.css instead.
+ * Inspired by maximatherapy.com cursor treatment; assets redistributed by package author.
+ */
+
+/* Custom cursors inspired by maximatherapy.com — SVG hotspot cursors. */
+
+body {
+  cursor: url('./assets/cursor-default.svg') 3 3, auto;
+}
+
+@media (max-width: 1280px) {
+  body {
+    cursor: url('./assets/cursor-default-70.svg') 2.1 2.1, auto;
+  }
+}
+
+a:hover,
+button:hover,
+[role='button']:hover,
+summary:hover,
+label[for]:hover,
+.cursor-pointer:hover {
+  cursor: url('./assets/cursor-pointer.svg') 18 0, pointer;
+}
+
+@media (max-width: 1280px) {
+  a:hover,
+  button:hover,
+  [role='button']:hover,
+  summary:hover,
+  label[for]:hover,
+  .cursor-pointer:hover {
+    cursor: url('./assets/cursor-pointer-70.svg') 12.6 0, pointer;
+  }
+}
+
+/* Override Tailwind cursor utilities so interactive UI keeps the custom look. */
+.cursor-default {
+  cursor: url('./assets/cursor-default.svg') 3 3, auto;
+}
+
+.cursor-pointer {
+  cursor: url('./assets/cursor-pointer.svg') 18 0, pointer;
+}
+
+.cursor-grab,
+[style*='cursor: grab'] {
+  cursor: url('./assets/cursor-grab.svg') 22 25, grab;
+}
+
+.cursor-grabbing,
+[style*='cursor: grabbing'] {
+  cursor: url('./assets/cursor-grabbing.svg') 21 22, grabbing;
+}
+
+@media (max-width: 1280px) {
+  .cursor-default {
+    cursor: url('./assets/cursor-default-70.svg') 2.1 2.1, auto;
+  }
+
+  .cursor-pointer {
+    cursor: url('./assets/cursor-pointer-70.svg') 12.6 0, pointer;
+  }
+
+  .cursor-grab,
+  [style*='cursor: grab'] {
+    cursor: url('./assets/cursor-grab-70.svg') 15.4 17.5, grab;
+  }
+
+  .cursor-grabbing,
+  [style*='cursor: grabbing'] {
+    cursor: url('./assets/cursor-grabbing-70.svg') 14.7 15.4, grabbing;
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "name": "@sherotree/cursors",
+  "version": "0.1.0",
+  "description": "Reusable SVG hotspot cursor CSS set (default, pointer, grab, grabbing) with responsive sizes",
+  "license": "MIT",
+  "author": "Sherotree",
+  "keywords": [
+    "css",
+    "cursor",
+    "cursors",
+    "svg",
+    "hotspot",
+    "pointer",
+    "grab",
+    "tailwind",
+    "ui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sherotree/cursors.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sherotree/cursors/issues"
+  },
+  "homepage": "https://github.com/sherotree/cursors#readme",
+  "files": [
+    "style.css",
+    "scoped.css",
+    "assets",
+    "LICENSE",
+    "README.md"
+  ],
+  "exports": {
+    ".": "./style.css",
+    "./style.css": "./style.css",
+    "./scoped.css": "./scoped.css",
+    "./package.json": "./package.json"
+  },
+  "sideEffects": [
+    "*.css"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
