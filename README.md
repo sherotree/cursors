@@ -4,7 +4,7 @@ Reusable **SVG hotspot cursors** for the web: default, pointer, grab, and grabbi
 
 Originally extracted from [Uwarp](https://www.uwarp.design) design tools.
 
-![@sherotree/cursors demo](https://cdn.jsdelivr.net/npm/@sherotree/cursors@0.1.1/media/demo.gif)
+![@sherotree/cursors demo](media/demo.gif)
 
 ## Install
 
