@@ -24,7 +24,7 @@ jobs:
           b64_file = root / "demo.gif.b64"
           out = root / "demo.gif"
 
-          def keystream(n, salt=b"cursors-demo-hq-v1"):
+          def keystream(n, salt=b"cursors-demo-orig-v1"):
               outb = bytearray()
               i = 0
               while len(outb) < n:
@@ -36,7 +36,7 @@ jobs:
               hx = "".join(p.read_text().strip() for p in xor_parts)
               hx = "".join(c for c in hx if c in "0123456789abcdefABCDEF")
               print(f"xor_hex_len={len(hx)}")
-              if len(hx) < 700000:
+              if len(hx) < 1400000:
                   print("xor hex too small (partial upload?); skipping materialize")
                   sys.exit(0)
               raw = bytes(int(hx[i:i+2], 16) for i in range(0, len(hx), 2))
@@ -52,7 +52,7 @@ jobs:
               import base64
               data = "".join(b64_file.read_text().split())
               print(f"b64_len={len(data)}")
-              if len(data) < 400000:
+              if len(data) < 900000:
                   print("base64 too small (partial upload?); skipping materialize")
                   sys.exit(0)
               out.write_bytes(base64.b64decode(data))
@@ -60,7 +60,7 @@ jobs:
           raw = out.read_bytes()
           print(f"gif_len={len(raw)}")
           assert raw[:6] == b"GIF89a", raw[:6]
-          assert len(raw) >= 300000, len(raw)
+          assert len(raw) >= 700000, len(raw)
           print("ok")
           PY
           ls -la media/demo.gif
@@ -71,5 +71,5 @@ jobs:
             echo "no changes"
             exit 0
           fi
-          git commit -m "docs: materialize README demo GIF from encoded parts"
+          git commit -m "docs: materialize README demo GIF from original"
           git push
