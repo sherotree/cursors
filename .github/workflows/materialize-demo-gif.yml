@@ -16,11 +16,22 @@ jobs:
         run: |
           set -euo pipefail
           if compgen -G "media/demo.gif.b64.*" > /dev/null; then
-            cat $(ls media/demo.gif.b64.* | sort) > media/demo.gif.b64
+            # Concatenate sorted parts; strip newlines/whitespace for safety
+            cat $(ls media/demo.gif.b64.* | sort) | tr -d '\n\r \t' > media/demo.gif.b64
           fi
           test -f media/demo.gif.b64
+          B64_LEN=$(wc -c < media/demo.gif.b64 | tr -d ' ')
+          echo "b64_len=$B64_LEN"
+          # HQ base64 is 488204 chars; skip partial uploads
+          if [ "$B64_LEN" -lt 400000 ]; then
+            echo "base64 too small (partial upload?); skipping materialize"
+            exit 0
+          fi
           base64 -d media/demo.gif.b64 > media/demo.gif
           head -c 6 media/demo.gif | grep -q GIF89a
+          GIF_LEN=$(wc -c < media/demo.gif | tr -d ' ')
+          echo "gif_len=$GIF_LEN"
+          test "$GIF_LEN" -ge 300000
           ls -la media/demo.gif
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
