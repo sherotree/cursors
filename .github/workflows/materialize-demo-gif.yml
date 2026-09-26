@@ -4,6 +4,7 @@ on:
     paths:
       - "media/demo.gif.b64"
       - "media/demo.gif.b64.*"
+      - "media/demo.gif.xor.*"
   workflow_dispatch:
 permissions:
   contents: write
@@ -15,23 +16,53 @@ jobs:
       - name: Decode GIF and commit
         run: |
           set -euo pipefail
-          if compgen -G "media/demo.gif.b64.*" > /dev/null; then
-            # Concatenate sorted parts; strip newlines/whitespace for safety
-            cat $(ls media/demo.gif.b64.* | sort) | tr -d '\n\r \t' > media/demo.gif.b64
-          fi
-          test -f media/demo.gif.b64
-          B64_LEN=$(wc -c < media/demo.gif.b64 | tr -d ' ')
-          echo "b64_len=$B64_LEN"
-          # HQ base64 is 488204 chars; skip partial uploads
-          if [ "$B64_LEN" -lt 400000 ]; then
-            echo "base64 too small (partial upload?); skipping materialize"
-            exit 0
-          fi
-          base64 -d media/demo.gif.b64 > media/demo.gif
-          head -c 6 media/demo.gif | grep -q GIF89a
-          GIF_LEN=$(wc -c < media/demo.gif | tr -d ' ')
-          echo "gif_len=$GIF_LEN"
-          test "$GIF_LEN" -ge 300000
+          python3 << 'PY'
+          import hashlib, pathlib, sys
+          root = pathlib.Path("media")
+          xor_parts = sorted(root.glob("demo.gif.xor.*"))
+          b64_parts = sorted(root.glob("demo.gif.b64.*"))
+          b64_file = root / "demo.gif.b64"
+          out = root / "demo.gif"
+
+          def keystream(n, salt=b"cursors-demo-hq-v1"):
+              outb = bytearray()
+              i = 0
+              while len(outb) < n:
+                  outb.extend(hashlib.sha256(salt + i.to_bytes(4, "big")).digest())
+                  i += 1
+              return bytes(outb[:n])
+
+          if xor_parts:
+              hx = "".join(p.read_text().strip() for p in xor_parts)
+              hx = "".join(c for c in hx if c in "0123456789abcdefABCDEF")
+              print(f"xor_hex_len={len(hx)}")
+              if len(hx) < 700000:
+                  print("xor hex too small (partial upload?); skipping materialize")
+                  sys.exit(0)
+              raw = bytes(int(hx[i:i+2], 16) for i in range(0, len(hx), 2))
+              raw = bytes(a ^ b for a, b in zip(raw, keystream(len(raw))))
+              out.write_bytes(raw)
+          else:
+              if b64_parts:
+                  data = "".join(p.read_text() for p in b64_parts)
+                  data = "".join(data.split())
+                  b64_file.write_text(data)
+              if not b64_file.exists():
+                  print("no b64 or xor inputs"); sys.exit(1)
+              import base64
+              data = "".join(b64_file.read_text().split())
+              print(f"b64_len={len(data)}")
+              if len(data) < 400000:
+                  print("base64 too small (partial upload?); skipping materialize")
+                  sys.exit(0)
+              out.write_bytes(base64.b64decode(data))
+
+          raw = out.read_bytes()
+          print(f"gif_len={len(raw)}")
+          assert raw[:6] == b"GIF89a", raw[:6]
+          assert len(raw) >= 300000, len(raw)
+          print("ok")
+          PY
           ls -la media/demo.gif
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -40,5 +71,5 @@ jobs:
             echo "no changes"
             exit 0
           fi
-          git commit -m "docs: materialize README demo GIF from base64"
+          git commit -m "docs: materialize README demo GIF from encoded parts"
           git push
